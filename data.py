@@ -2,7 +2,7 @@ import pygame
 import math
 
 SIZE = (1000, 600)
-FRICTION = 0.01
+FRICTION = 0.1
 
 
 def distance_between_two_dots(x1, y1, x2, y2):
@@ -25,7 +25,7 @@ def vector_to_another_dot(x1, y1, x2, y2):
 
 
 class Point(pygame.sprite.Sprite):
-    def __init__(self, x, y, detached_to=None, mass=1):
+    def __init__(self, x, y, detached_to_1=None, detached_to_2=None, mass=1):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('dot.png')
         self.rect = self.image.get_rect(center=(x, y))
@@ -35,15 +35,26 @@ class Point(pygame.sprite.Sprite):
         self.y_speed = 0
         self.mass = mass
 
-        # link to another point
-        self.detached_to = detached_to
-        if detached_to:
-            self.needed_distance_to_detached_to = distance_between_two_dots(
-                detached_to.x,
-                detached_to.y,
+        # links to another points
+        self.detached_to = []
+        self.needed_distances_to_detached_to = []
+
+        if detached_to_1:
+            self.detached_to.append(detached_to_1)
+            self.needed_distances_to_detached_to.append(distance_between_two_dots(
+                detached_to_1.x,
+                detached_to_1.y,
                 self.x,
                 self.y,
-            )
+            ))
+        if detached_to_2:
+            self.detached_to.append(detached_to_2)
+            self.needed_distances_to_detached_to.append(distance_between_two_dots(
+                detached_to_2.x,
+                detached_to_2.y,
+                self.x,
+                self.y,
+            ))
 
     def give_force(self, x_vector, y_vector, newtons):
         self.x_speed += round(newtons / self.mass) * x_vector
@@ -51,22 +62,35 @@ class Point(pygame.sprite.Sprite):
 
     def update(self):
         if self.detached_to:
-            distance_to_detached_to = distance_between_two_dots(
-                self.detached_to.x,
-                self.detached_to.y,
-                self.x,
-                self.y,
-            )
-            if self.needed_distance_to_detached_to < distance_to_detached_to:
-                # here this dot should be given force towards another dot
-                vector = vector_to_another_dot(self.x, self.y, self.detached_to.x, self.detached_to.y)
-                self.give_force(vector[0], vector[1], 1)
-                self.detached_to.give_force(-vector[0], -vector[1], 1)
-            elif self.needed_distance_to_detached_to > distance_to_detached_to:
-                # here this dot should be given force away from another dot
-                vector = vector_to_another_dot(self.x, self.y, self.detached_to.x, self.detached_to.y)
-                self.give_force(vector[0], vector[1], -1)
-                self.detached_to.give_force(-vector[0], -vector[1], -1)
+            for point, needed_distance in zip(self.detached_to, self.needed_distances_to_detached_to):
+                vector = vector_to_another_dot(self.x, self.y, point.x, point.y)
+                actual_distance_to_detached_to = distance_between_two_dots(
+                    point.x,
+                    point.y,
+                    self.x,
+                    self.y,
+                )
+                force = (actual_distance_to_detached_to - needed_distance) / 10
+                eps = 10
+                if needed_distance < actual_distance_to_detached_to - eps:
+                    # here this dot should be given force towards another dot
+                    self.give_force(vector[0], vector[1], force)
+                    point.give_force(-vector[0], -vector[1], force)
+                    # print('to')
+                    self.x += vector[0]
+                    self.y += vector[1]
+                    point.x -= vector[0]
+                    point.y -= vector[1]
+                elif needed_distance > actual_distance_to_detached_to + eps:
+                    # # here this dot should be given force away from another dot
+                    self.give_force(vector[0], vector[1], force)
+                    point.give_force(-vector[0], -vector[1], force)
+                    # print('away')
+                    self.x -= vector[0]
+                    self.y -= vector[1]
+                    point.x += vector[0]
+                    point.y += vector[1]
+
         # protecting object from getting outside the screen
         if 0 > self.rect.x:
             self.x = 0

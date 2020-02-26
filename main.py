@@ -6,9 +6,10 @@ FPS = 60
 pygame.init()
 sc = pygame.display.set_mode(SIZE)
 clock = pygame.time.Clock()
-points = [None,
-          Point(500, 300)]
-points[0] = Point(400, 300, points[1])
+points = []
+points.append(Point(60, 60))
+points.append(Point(100, 100, points[0]))
+points.append(Point(120, 60, points[0], points[1]))
 motion_x = 0
 motion_y = 0
 force = 1
