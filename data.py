@@ -2,7 +2,7 @@ import pygame
 import math
 
 SIZE = (1000, 600)
-FRICTION = 0.1
+FRICTION = 0.01
 
 
 def distance_between_two_dots(x1, y1, x2, y2):
@@ -25,7 +25,7 @@ def vector_to_another_dot(x1, y1, x2, y2):
 
 
 class Point(pygame.sprite.Sprite):
-    def __init__(self, x, y, detached_to_1=None, detached_to_2=None, mass=1.0):
+    def __init__(self, x, y, detached_to_1=None, detached_to_2=None, detached_to_3=None, mass=1.0):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('dot.png')
         self.rect = self.image.get_rect(center=(x, y))
@@ -55,10 +55,18 @@ class Point(pygame.sprite.Sprite):
                 self.x,
                 self.y,
             ))
+        if detached_to_3:
+            self.detached_to.append(detached_to_3)
+            self.needed_distances_to_detached_to.append(distance_between_two_dots(
+                detached_to_3.x,
+                detached_to_3.y,
+                self.x,
+                self.y,
+            ))
 
     def give_force(self, x_vector, y_vector, newtons):
-        self.x_speed += round(newtons / self.mass) * x_vector
-        self.y_speed += round(newtons / self.mass) * y_vector
+        self.x_speed += newtons / self.mass * x_vector
+        self.y_speed += newtons / self.mass * y_vector
 
     def update(self):
         if self.detached_to:
