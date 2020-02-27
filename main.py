@@ -7,9 +7,10 @@ pygame.init()
 sc = pygame.display.set_mode(SIZE)
 clock = pygame.time.Clock()
 points = []
-points.append(Point(60, 60))
-points.append(Point(100, 100, points[0]))
-points.append(Point(120, 60, points[0], points[1]))
+points.append(Point(300, 300))
+points.append(Point(350, 300, points[0]))
+points.append(Point(300, 400, points[0], points[1]))
+points.append(Point(350, 400, points[1], points[2]))
 motion_x = 0
 motion_y = 0
 force = 1
@@ -17,7 +18,7 @@ force = 1
 while 1:
     sc.fill((0, 0, 0))
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             pygame.quit()
             sys.exit()
         if event.type == pygame.KEYDOWN:

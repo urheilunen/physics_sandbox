@@ -25,7 +25,7 @@ def vector_to_another_dot(x1, y1, x2, y2):
 
 
 class Point(pygame.sprite.Sprite):
-    def __init__(self, x, y, detached_to_1=None, detached_to_2=None, mass=1):
+    def __init__(self, x, y, detached_to_1=None, detached_to_2=None, mass=1.0):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('dot.png')
         self.rect = self.image.get_rect(center=(x, y))
@@ -70,8 +70,8 @@ class Point(pygame.sprite.Sprite):
                     self.x,
                     self.y,
                 )
-                force = (actual_distance_to_detached_to - needed_distance) / 10
-                eps = 10
+                force = (actual_distance_to_detached_to - needed_distance) / 4
+                eps = 1
                 if needed_distance < actual_distance_to_detached_to - eps:
                     # here this dot should be given force towards another dot
                     self.give_force(vector[0], vector[1], force)
